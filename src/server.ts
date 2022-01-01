@@ -1,7 +1,7 @@
 import { createServer } from 'http';
-import { parse } from 'querystring';
-import { Client } from 'discord.js';
-const client = new Client();
+
+import { Client, Intents, Message, TextChannel } from 'discord.js';
+const client = new Client({intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES]});
 
 createServer((req, res) => {
     res.writeHead(200, {'Content-Type': 'text/plain'});
@@ -9,15 +9,14 @@ createServer((req, res) => {
 }).listen(3000);
 
 client.on('ready', message =>{
-  console.log('Bot準備完了～');
-  client.user.setPresence({ activity: { name: 'げーむ' } });
+  console.log('Bot is ready.');
 });
 
 client.on('message', message =>{
   if (message.author.id == client.user.id || message.author.bot){
     return;
   }
-  if(message.isMemberMentioned(client.user)){
+  if(message.mentions.has(client.user)){
     sendReply(message, "呼びましたか？");
     return;
   }
@@ -35,14 +34,15 @@ if(process.env.DISCORD_BOT_TOKEN == undefined){
 
 client.login( process.env.DISCORD_BOT_TOKEN );
 
-function sendReply(message, text){
+function sendReply(message: Message<boolean>, text: string){
   message.reply(text)
-    .then(console.log("リプライ送信: " + text))
+    .then( text => console.log("リプライ送信: " + text))
     .catch(console.error);
 }
 
-function sendMsg(channelId, text, option={}){
-  client.channels.get(channelId).send(text, option)
-    .then(console.log("メッセージ送信: " + text + JSON.stringify(option)))
+function sendMsg(channelId: string, text: string, option={}){
+  const textChannel =  client.channels.cache.get(channelId) as TextChannel;
+  textChannel.send(text)
+    .then( text => console.log("メッセージ送信: " + text + JSON.stringify(option)))
     .catch(console.error);
 }
