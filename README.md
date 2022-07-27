@@ -1,1 +1,1 @@
-# fortnite-scrim-scheduler
+# fortnite scrim scheduler
